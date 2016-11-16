@@ -1,0 +1,10 @@
+PREFIX dbr: <http://dbpedia.org/resource/>
+PREFIX dbo: <http://dbpedia.org/ontology/>
+PREFIX db: <http://dbpedia.org/>
+PREFIX dbc: <http://dbpedia.org/resource/Category:>
+PREFIX dct: <http://purl.org/dc/terms/>
+SELECT ?location
+WHERE {
+	?location dct:subject dbc:Jasper_National_Park .
+	?location dct:subject dbc:Lakes_of_Alberta .
+}

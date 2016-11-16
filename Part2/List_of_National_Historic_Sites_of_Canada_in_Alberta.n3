@@ -1,0 +1,43 @@
+@prefix dbo:	<http://dbpedia.org/ontology/> .
+@prefix dbr:	<http://dbpedia.org/resource/> .
+<http://dbpedia.org/resource/Fort_Victoria,_Alberta>	dbo:type	dbr:List_of_National_Historic_Sites_of_Canada_in_Alberta .
+@prefix dbp:	<http://dbpedia.org/property/> .
+<http://dbpedia.org/resource/Fort_Victoria,_Alberta>	dbp:type	dbr:List_of_National_Historic_Sites_of_Canada_in_Alberta .
+@prefix foaf:	<http://xmlns.com/foaf/0.1/> .
+@prefix wikipedia-en:	<http://en.wikipedia.org/wiki/> .
+wikipedia-en:List_of_National_Historic_Sites_of_Canada_in_Alberta	foaf:primaryTopic	dbr:List_of_National_Historic_Sites_of_Canada_in_Alberta .
+dbr:List_of_National_Historic_Sites_in_Alberta	dbo:wikiPageRedirects	dbr:List_of_National_Historic_Sites_of_Canada_in_Alberta .
+dbr:National_Historic_Sites_in_Alberta	dbo:wikiPageRedirects	dbr:List_of_National_Historic_Sites_of_Canada_in_Alberta .
+dbr:National_Historic_Sites_of_Canada_in_Alberta	dbo:wikiPageRedirects	dbr:List_of_National_Historic_Sites_of_Canada_in_Alberta .
+@prefix owl:	<http://www.w3.org/2002/07/owl#> .
+@prefix dbpedia-fr:	<http://fr.dbpedia.org/resource/> .
+dbr:List_of_National_Historic_Sites_of_Canada_in_Alberta	owl:sameAs	dbpedia-fr:Liste_des_lieux_historiques_nationaux_du_Canada_en_Alberta ,
+		dbr:List_of_National_Historic_Sites_of_Canada_in_Alberta .
+@prefix dbpedia-wikidata:	<http://wikidata.dbpedia.org/resource/> .
+dbr:List_of_National_Historic_Sites_of_Canada_in_Alberta	owl:sameAs	dbpedia-wikidata:Q1847432 .
+@prefix dbpedia-de:	<http://de.dbpedia.org/resource/> .
+dbr:List_of_National_Historic_Sites_of_Canada_in_Alberta	owl:sameAs	dbpedia-de:Liste_der_National_Historic_Sites_of_Canada_in_Alberta .
+@prefix wikidata:	<http://www.wikidata.org/entity/> .
+dbr:List_of_National_Historic_Sites_of_Canada_in_Alberta	owl:sameAs	wikidata:Q1847432 .
+@prefix dct:	<http://purl.org/dc/terms/> .
+@prefix dbc:	<http://dbpedia.org/resource/Category:> .
+dbr:List_of_National_Historic_Sites_of_Canada_in_Alberta	dct:subject	dbc:Alberta-related_lists ,
+		dbc:National_Historic_Sites_in_Alberta ,
+		dbc:Lists_of_National_Historic_Sites_of_Canada .
+@prefix rdfs:	<http://www.w3.org/2000/01/rdf-schema#> .
+dbr:List_of_National_Historic_Sites_of_Canada_in_Alberta	rdfs:label	"Liste der National Historic Sites of Canada in Alberta"@de ,
+		"Liste des lieux historiques nationaux du Canada en Alberta"@fr ,
+		"List of National Historic Sites of Canada in Alberta"@en ;
+	rdfs:comment	"Voici la liste des lieux historiques nationaux du Canada (anglais : National Historic Sites of Canada) situ\u00E9 en Alberta. En mars 2011, on compte 59 lieux historiques nationaux en Alberta, dont 14 sont administr\u00E9s par Parcs Canada. De ce nombre, il faut rajout\u00E9 aussi un site qui a perdu sa d\u00E9signation.Les noms des sites correspondent \u00E0 ceux donn\u00E9s par la commission des lieux et monuments historiques du Canada, qui peuvent \u00EAtre diff\u00E9rents de ceux donn\u00E9s par le milieu local."@fr ,
+		"Diese Liste beinhaltet alle Bauwerke, Objekte und St\u00E4tten in der kanadischen Provinz Alberta, die den Status einer National Historic Site of Canada (frz. lieu historique national du Canada) besitzen. Das Historic Sites and Monuments Board of Canada, als Beh\u00F6rde im Gesch\u00E4ftsbereich des kanadischen Bundesumweltministeriums, nahm bisher 59 St\u00E4tten in diese Liste auf.(Stand: Juni 2012) Von diesen werden zurzeit 14 von Parks Canada verwaltet."@de ,
+		"This is a list of National Historic Sites of Canada (French: Lieux historiques nationaux du Canada) in the province of Alberta.  There are 60 National Historic Sites designated in Alberta, 14 of which are administered by Parks Canada (identified below by the beaver icon 25px)."@en ;
+	foaf:depiction	<http://commons.wikimedia.org/wiki/Special:FilePath/Beaver_1_(PSF)(retouched)(transparent).png> ;
+	foaf:isPrimaryTopicOf	wikipedia-en:List_of_National_Historic_Sites_of_Canada_in_Alberta .
+@prefix prov:	<http://www.w3.org/ns/prov#> .
+dbr:List_of_National_Historic_Sites_of_Canada_in_Alberta	prov:wasDerivedFrom	<http://en.wikipedia.org/wiki/List_of_National_Historic_Sites_of_Canada_in_Alberta?oldid=694130889> ;
+	dbo:wikiPageID	27692856 ;
+	dbo:wikiPageRevisionID	694130889 ;
+	dbo:thumbnail	<http://commons.wikimedia.org/wiki/Special:FilePath/Beaver_1_(PSF)(retouched)(transparent).png?width=300> ;
+	dbo:abstract	"This is a list of National Historic Sites of Canada (French: Lieux historiques nationaux du Canada) in the province of Alberta.  There are 60 National Historic Sites designated in Alberta, 14 of which are administered by Parks Canada (identified below by the beaver icon 25px).  The first three sites in Alberta were designated in 1923 and are as follows: the site of rival trading posts Fort Augustus and Fort Edmonton, the site of the Frog Lake Massacre and the site of the first outpost of the North-West Mounted Police in Western Canada at Fort Macleod.This list uses names designated by the Historic Sites and Monuments Board of Canada, which may differ from other names for these sites."@en ,
+		"Voici la liste des lieux historiques nationaux du Canada (anglais : National Historic Sites of Canada) situ\u00E9 en Alberta. En mars 2011, on compte 59 lieux historiques nationaux en Alberta, dont 14 sont administr\u00E9s par Parcs Canada. De ce nombre, il faut rajout\u00E9 aussi un site qui a perdu sa d\u00E9signation.Les noms des sites correspondent \u00E0 ceux donn\u00E9s par la commission des lieux et monuments historiques du Canada, qui peuvent \u00EAtre diff\u00E9rents de ceux donn\u00E9s par le milieu local."@fr ,
+		"Diese Liste beinhaltet alle Bauwerke, Objekte und St\u00E4tten in der kanadischen Provinz Alberta, die den Status einer National Historic Site of Canada (frz. lieu historique national du Canada) besitzen. Das Historic Sites and Monuments Board of Canada, als Beh\u00F6rde im Gesch\u00E4ftsbereich des kanadischen Bundesumweltministeriums, nahm bisher 59 St\u00E4tten in diese Liste auf.(Stand: Juni 2012) Von diesen werden zurzeit 14 von Parks Canada verwaltet."@de .
