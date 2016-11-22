@@ -6,6 +6,6 @@ PREFIX dbp: <http://dbpedia.org/property/>
 SELECT ?test ?car ?city WHERE {
     ?city rdf:type schema:City .
   	?city dbp:subdivisionName ?test .
-	FILTER regex(?title, "^SPARQL")
- 
+	FILTER regex(?title < 10)   .
+	FILTER regex(?title, "^SPARQL") .
 } 

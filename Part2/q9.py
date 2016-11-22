@@ -112,54 +112,51 @@ for e in re.findall(r"prefix\s+(.+:)\s*(<[^\s]+>)",text,re.I):
 printVariables = re.search(r"select\s+(.+)where\s+{",text,re.I).group(1).split()
 for e in printVariables:
     if e!='*': allVariables[e] = []
-temp_list = querySearch = re.search(r"where\s+\{\s*([^\}]+)\}",text,re.I).group(1).split('\n')
+temp_list = filter(None,re.search(r"where\s+\{\s*([^\}]+)\}",text,re.I).group(1).split('\n'))
 print temp_list
 #filter\s*regex\((.*),\s*(.*)\)
-triples = [[]]
-triple_styles = [[]]
+triples = []
+triple_styles = []
+regFilter = []
+opFilter = []
 # [('Filter',position)]
 order = []
 
 for i in range(len(temp_list)):
-    if temp_list[i] != '.':
-        triples[-1].append(temp_list[i])
-        if temp_list[i].startswith('?'):
-            allVariables[temp_list[i]] = []
-            triple_styles[-1].append("")
-        else:
-            found = False
-            for t in prefixes:
-                if temp_list[i].startswith(t):
-                    triple_styles[-1].append(t)
-                    found = True
-                    break
-            if not found:
-                triple_styles[-1].append("other")
-    elif i<len(temp_list)-1:
-        triples.append([])
+    if temp_list[i].split()[-1] != '.':
+        if (i < len(temp_list)): error("missing . at end of line:"+str(temp_list[i]))
+        else: temp_list[i] += ' . '
+    x = re.findall(r"filter\s*regex\((.*),\s*(.*)\)",temp_list[i],re.I)
+    if x != []:
+        regFilter.append(list(x[0]))
+        order.append(['reg',len(regFilter)-1])
+        continue
+    x = re.findall(r"filter\s*regex\((.*)\)\s*",temp_list[i],re.I)
+    if x != []:
+        opFilter.append(x[0].split())
+        order.append(['reg',len(opFilter)-1])
+        continue
+    l = temp_list[i].split()
+    if len(l) == 4:
+        del l[-1]
+        triples.append(l)
         triple_styles.append([])
-
-"""
-OLD
-for i in range(len(temp_list)):
-    if temp_list[i] != '.':
-        triples[-1].append(temp_list[i])
-        if temp_list[i].startswith('?'):
-            allVariables[temp_list[i]] = []
-            triple_styles[-1].append("")
-        else:
-            found = False
-            for t in prefixes:
-                if temp_list[i].startswith(t):
-                    triple_styles[-1].append(t)
-                    found = True
-                    break
-            if not found:
-                triple_styles[-1].append("other")
-    elif i<len(temp_list)-1:
-        triples.append([])
-        triple_styles.append([])
-"""
+        for e in l:
+            if e.startswith('?'):
+                allVariables[e] = []
+                triple_styles[-1].append("")
+            else:
+                found = False
+                for t in prefixes:
+                    if e.startswith(t):
+                        triple_styles[-1].append(t)
+                        found = True
+                        break
+                if not found:
+                    triple_styles[-1].append("other")
+        order.append(['triple',len(triples)-1])
+        continue
+    error("invalid formatting of line: "+str(temp_list[i]))
 
 ##### BEGIN SEARCHING #####
 
