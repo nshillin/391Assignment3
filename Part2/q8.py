@@ -70,7 +70,7 @@ try_query("CREATE TABLE prefix (start text, url text, unique (start))")
 for i in prefixes:
     try_query("INSERT INTO prefix (start,url) VALUES (?,?)",(i,prefixes[i]))
 
-try_query('CREATE TABLE tripletables (tablename text, unique (tablename))')
+try_query('CREATE TABLE tripletables (tablename text, subj text, pred text, obj text, unique (tablename))')
 
 triple_styles = []
 for triple in triples:
@@ -87,7 +87,7 @@ for triple in triples:
         triple_styles.append(new_triple_style)
         # Try to create new table
         try_query('CREATE TABLE ' + table_name + ' (subj text, pred text, obj text, unique (subj,pred,obj))')
-        try_query("INSERT INTO tripletables (tablename) VALUES (?)",(table_name,))
+        try_query("INSERT INTO tripletables (tablename, subj, pred, obj) VALUES (?,?,?,?)",(table_name, new_triple_style[0], new_triple_style[1], new_triple_style[2]))
     # Insert values
     try_query("INSERT INTO " + table_name + ' VALUES ("'+triple[0]+'","'+triple[1]+'","'+triple[2]+'")')
 
