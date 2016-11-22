@@ -70,13 +70,16 @@ def makeWhere(triple):
             allVariables[e] = []
     return where[:-4]
 
-def printTable(variables,printVariables):
-    if printVariables[0] == '*':
-        for e in allVariables:
-            printVariables.append(e)
+def printTable(variables,printVars):
+    if printVars[0] == '*':
+        printVars = []
+        for e in variables:
+            print e
+            printVars.append(e)
     sep = '|| '
     printList = [sep]*(len(variables[max(variables, key= lambda y: len(set(variables[y])))])+2)
-    for a in printVariables:
+    for a in printVars:
+        print a
         width = len(a)+1
         if len(variables[a])>0:width = len(max(variables[a], key=len))+1
         printList[0] += a+" "*(width-len(a))+sep
@@ -90,6 +93,19 @@ def printTable(variables,printVariables):
     for x in printList:
         print x
 
+def fillEmptyRows():
+    global allVariables
+    for i in allVariables:
+        if len(allVariables[i])<len(max(variables[a], key=len)):
+            allVariables[i].append(None)
+
+def removeRow(number):
+    global allVariables
+    if row>=len(allVariables('row')):
+        return
+    for i in allVariables:
+        del allVariables[i][number]
+
 
 ##### START OF MAIN CODE #####
 
@@ -99,7 +115,7 @@ if len(args) != 3:
 
 prefixes = {'other':'NULL'}
 printVariables = []
-allVariables = {} # variable object example: "?city:['dbr:Edmonton','dbr:Calgary']"
+allVariables = {'row':[]} # variable object example: "?city:['dbr:Edmonton','dbr:Calgary']"
 triples = []
 
 with open(args[2], 'r') as queryFile:
@@ -113,7 +129,7 @@ printVariables = re.search(r"select\s+(.+)where\s+{",text,re.I).group(1).split()
 for e in printVariables:
     if e!='*': allVariables[e] = []
 temp_list = filter(None,re.search(r"where\s+\{\s*([^\}]+)\}",text,re.I).group(1).split('\n'))
-print temp_list
+#print temp_list
 #filter\s*regex\((.*),\s*(.*)\)
 triples = []
 triple_styles = []
@@ -128,13 +144,15 @@ for i in range(len(temp_list)):
         else: temp_list[i] += ' . '
     x = re.findall(r"filter\s*regex\((.*),\s*(.*)\)",temp_list[i],re.I)
     if x != []:
+        if not x[0][0].startswith('?'): error("line not formatted properly:"+str(temp_list[i]))
         regFilter.append(list(x[0]))
         order.append(['reg',len(regFilter)-1])
         continue
     x = re.findall(r"filter\s*regex\((.*)\)\s*",temp_list[i],re.I)
     if x != []:
+        if not x[0][0].startswith('?'): error("line not formatted properly:"+str(temp_list[i]))
         opFilter.append(x[0].split())
-        order.append(['reg',len(opFilter)-1])
+        order.append(['op',len(opFilter)-1])
         continue
     l = temp_list[i].split()
     if len(l) == 4:
@@ -165,14 +183,39 @@ c = conn.cursor()
 
 checkPrefixes()
 
-for i in range(len(triples)):
-    tablenames = getTableNames()
-    where = makeWhere(triples[i])
-    for tablename in tablenames:
-        for row in c.execute('SELECT * FROM '+tablename + where):
-            for y in range(len(triples[i])):
-                if triples[i][y].startswith("?"):
+for x in range(len(order)):
+    kind = order[x][0]
+    i = order[x][1]
+    if kind == 'triple':
+        tablenames = getTableNames()
+        where = makeWhere(triples[i])
+        for tablename in tablenames:
+            for row in c.execute('SELECT * FROM '+tablename + where):
+                tripRow = []
+                toRemove = []
+                for y in range(len(triples[i])):
+                    if triples[i][y].startswith("?"):
+                        tripRow.append([triples[y],str(row[y])])
+                    else:
+                        tripRow.append(['row',None])
+                for z in len(allVariables.row):
+                    aV1,aV2,aV3 = allVariables[tripRow[0][0]][z], allVariables[tripRow[1][0]][z], allVariables[tripRow[2][0]][z]
+
+                    if (aV1 != tripRow[0][1] and aV1==None) or (aV2 != tripRow[0][1] and aV2==None) or (aV3 != tripRow[0][1] and aV2==None):
+
+                    elif not ((aV1 == tripRow[0][1]) and (aV2 == tripRow[0][1]) and (aV3 == tripRow[0][1])):
+                        toRemove.append(z)
+                        break
                     allVariables[triples[i][y]].append(str(row[y]))
+    elif kind == 'op':
+        #for e in allVariables[opFilter[i][0]]:
+        #
+        pass
+    elif kind == 'reg':
+        for e in allVariables[regFilter[i][0]]:
+            print regFilter[i]
+        pass
+
 
 conn.commit()
 conn.close()
