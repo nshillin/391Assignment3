@@ -1,11 +1,9 @@
-PREFIX rdf:<http://www.w3.org/1999/02/22-rdf-syntax-ns#>
+PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
 PREFIX schema: <http://schema.org/>
 PREFIX dbr: <http://dbpedia.org/resource/>
 PREFIX dbo: <http://dbpedia.org/ontology/>
-PREFIX dbp: <http://dbpedia.org/property/>
-SELECT ?test ?car ?city WHERE {
+SELECT * WHERE {
     ?city rdf:type schema:City .
-  	?city dbp:subdivisionName ?test .
-	FILTER regex(?title < 10)   .
-	FILTER regex(?title, "^SPARQL") .
+  	?city dbo:country dbr:Canada .
+ 
 } 

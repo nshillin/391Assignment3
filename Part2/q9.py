@@ -60,25 +60,37 @@ def makeWhere(triple):
     for y in range(len(triple)):
         if triple[y] not in allVariables:
             where += types[y]+'="'+triple[y]+'" and '
-        elif len(allVariables[triple[y]])>0:
+        elif len(allVariables[triple[y]])>0 and allVariables[triple[y]][0] != None and len(set(allVariables[triple[y]]))>1:
             where += '('
             for value in allVariables[triple[y]]:
-                where += types[y]+'="'+value+'" or '
+                if value != None:
+                    where += types[y]+'="'+value+'" or '
             where = where[:-4] + ') and '
+    """
     for e in triple:
         if e in allVariables:
             allVariables[e] = []
+    """
     return where[:-4]
 
-def printTable(variables,printVariables):
-    if printVariables[0] == '*':
-        for e in allVariables:
-            printVariables.append(e)
+def printTable(variables,printVars):
+    printVars = ['row']+printVars
+    if printVars[1] == '*':
+        printVars = []
+        for e in variables:
+            if e != 'row': printVars = [e] + printVars
+        printVars = ['row'] + printVars
+    for i in range(len(variables['row'])):
+        variables['row'][i] = str(i)
     sep = '|| '
     printList = [sep]*(len(variables[max(variables, key= lambda y: len(set(variables[y])))])+2)
-    for a in printVariables:
+    for a in printVars:
+        for x in range(len(variables[a])):
+            if variables[a][x] == None:
+                variables[a][x] = ''
         width = len(a)+1
-        if len(variables[a])>0:width = len(max(variables[a], key=len))+1
+        if len(variables[a])>0 and len(max(variables[a], key=len))+1 > width:
+            width = len(max(variables[a], key=len))+1
         printList[0] += a+" "*(width-len(a))+sep
         printList[1] += "="*(width-1)+" "+sep
         for e in range(len(printList)-2):
@@ -90,6 +102,19 @@ def printTable(variables,printVariables):
     for x in printList:
         print x
 
+def fillEmptyRows():
+    global allVariables
+    for i in allVariables:
+        while len(allVariables[i])<len(allVariables[max(allVariables, key=lambda x:len(allVariables[x]))]):
+            allVariables[i].append(None)
+
+
+def removeRow(number):
+    global allVariables
+    if number>=len(allVariables['row']):
+        return
+    for i in allVariables:
+        del allVariables[i][number]
 
 ##### START OF MAIN CODE #####
 
@@ -99,7 +124,7 @@ if len(args) != 3:
 
 prefixes = {'other':'NULL'}
 printVariables = []
-allVariables = {} # variable object example: "?city:['dbr:Edmonton','dbr:Calgary']"
+allVariables = {'row':[]} # variable object example: "?city:['dbr:Edmonton','dbr:Calgary']"
 triples = []
 
 with open(args[2], 'r') as queryFile:
@@ -113,7 +138,7 @@ printVariables = re.search(r"select\s+(.+)where\s+{",text,re.I).group(1).split()
 for e in printVariables:
     if e!='*': allVariables[e] = []
 temp_list = filter(None,re.search(r"where\s+\{\s*([^\}]+)\}",text,re.I).group(1).split('\n'))
-print temp_list
+#print temp_list
 #filter\s*regex\((.*),\s*(.*)\)
 triples = []
 triple_styles = []
@@ -123,18 +148,24 @@ opFilter = []
 order = []
 
 for i in range(len(temp_list)):
-    if temp_list[i].split()[-1] != '.':
+    s = temp_list[i].split()
+    if len(s)==0:
+        continue
+    if s[-1] != '.':
         if (i < len(temp_list)): error("missing . at end of line:"+str(temp_list[i]))
         else: temp_list[i] += ' . '
     x = re.findall(r"filter\s*regex\((.*),\s*(.*)\)",temp_list[i],re.I)
     if x != []:
+        if not x[0][0].startswith('?'): error("line not formatted properly:"+str(temp_list[i]))
         regFilter.append(list(x[0]))
+        regFilter[-1][1] = regFilter[-1][1][1:-1]
         order.append(['reg',len(regFilter)-1])
         continue
     x = re.findall(r"filter\s*regex\((.*)\)\s*",temp_list[i],re.I)
     if x != []:
+        if not x[0][0].startswith('?'): error("line not formatted properly:"+str(temp_list[i]))
         opFilter.append(x[0].split())
-        order.append(['reg',len(opFilter)-1])
+        order.append(['op',len(opFilter)-1])
         continue
     l = temp_list[i].split()
     if len(l) == 4:
@@ -165,14 +196,58 @@ c = conn.cursor()
 
 checkPrefixes()
 
-for i in range(len(triples)):
-    tablenames = getTableNames()
-    where = makeWhere(triples[i])
-    for tablename in tablenames:
-        for row in c.execute('SELECT * FROM '+tablename + where):
-            for y in range(len(triples[i])):
-                if triples[i][y].startswith("?"):
-                    allVariables[triples[i][y]].append(str(row[y]))
+empty = True
+for x in range(len(order)):
+    kind = order[x][0]
+    i = order[x][1]
+    if kind == 'triple':
+        tablenames = getTableNames()
+        where = makeWhere(triples[i])
+        removeLast = False
+        if empty:
+            for tablename in tablenames:
+                for row in c.execute('SELECT * FROM '+tablename + where):
+                    for y in range(len(triples[i])):
+                        if triples[i][y].startswith("?"):
+                            allVariables[triples[i][y]].append(str(row[y].encode('utf-8')))
+                fillEmptyRows()
+                empty = False
+        else:
+            for tablename in tablenames:
+                for row in c.execute('SELECT * FROM '+tablename + where):
+                    tripRow = []
+                    toRemove = []
+                    for y in range(len(triples[i])):
+                        if triples[i][y].startswith("?"):
+                            tripRow.append([triples[i][y],str(row[y].encode('utf-8'))])
+                        else:
+                            tripRow.append(['row',None])
+                    for t in range(len(tripRow)):
+                        if tripRow[t][1] == None or tripRow[t][0] == 'row':
+                            continue
+                        #elif len(set(allVariables[tripRow[t][0]])) == 1 and allVariables[tripRow[t][0]][0] == None:
+                        elif None in allVariables[tripRow[t][0]]:
+                            for z in range(len(allVariables['row'])):
+                                if (allVariables[tripRow[(t+1)%3][0]][z] == tripRow[(t+1)%3][1]) and (allVariables[tripRow[(t+2)%3][0]][z] == tripRow[(t+2)%3][1]) and allVariables[tripRow[t][0]][z] == None:
+                                    allVariables[tripRow[t][0]][z] = tripRow[t][1]
+                                    allVariables[tripRow[(t+1)%3][0]].append(allVariables[tripRow[(t+1)%3][0]][z])
+                                    allVariables[tripRow[(t+2)%3][0]].append(allVariables[tripRow[(t+2)%3][0]][z])
+                                    fillEmptyRows()
+                                    removeLast = True
+                    for z in range(len(allVariables['row'])):
+                        aV1,aV2,aV3 = allVariables[tripRow[0][0]][z], allVariables[tripRow[1][0]][z], allVariables[tripRow[2][0]][z]
+                        if not ((aV1 == tripRow[0][1]) and (aV2 == tripRow[0][1]) and (aV3 == tripRow[0][1])):
+                            toRemove.append(z)
+                            break
+            if removeLast: removeRow(-1)
+    elif kind == 'op':
+        #for e in allVariables[opFilter[i][0]]:
+        #
+        pass
+    elif kind == 'reg':
+        for row in range(len(allVariables[regFilter[i][0]])-1,-1,-1):
+            if allVariables[regFilter[i][0]][row] == None or (regFilter[i][1].lower() not in allVariables[regFilter[i][0]][row].lower()):
+                removeRow(row)
 
 conn.commit()
 conn.close()
@@ -181,10 +256,3 @@ conn.close()
 
 printTable(allVariables,printVariables)
 #pd.DataFrame(allVariables)
-"""
-for x in range(len(printVariables)):
-    if printVariables != '*':
-        for y in allVariables[x]:
-            print y
-    #else: for
-"""
