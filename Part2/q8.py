@@ -24,6 +24,20 @@ def splitLine(line):
             new_triple[i] = new_triple[i].split('^^')[0].replace('@en','').strip('"')
         else:
             should_append = False
+            continue
+        if new_triple[i][0] == '<' and new_triple[i][-1] == '>':
+            temp = new_triple[i]
+            if '#' in temp:
+                pos = temp.rfind('#')
+            elif temp.count('/') > 2:
+                pos = temp.rfind('/')
+            else:
+                new_triple[i] = temp.replace('<','').replace('>','')
+                continue
+            prefixes[temp[1:pos+1]] = temp[:pos+1]+'>'
+            print temp[1:pos+1], prefixes[temp[1:pos+1]]
+            new_triple[i] = temp[1:-1]
+            print new_triple[i].replace(prefixes[temp[1:pos+1]],'')
     if should_append:
         triples.append(new_triple)
         prev_triple = new_triple
@@ -50,7 +64,7 @@ if len(args) != 3:
     error("Expected 'python q8.py <db file> <RDF Turtle file>'")
 
 
-prefixes = {'other':'NULL'}
+prefixes = {'other':'<>'}
 triples = []
 prev_triple = []
 expected = 3
@@ -65,10 +79,10 @@ for line in open(args[2]):
 conn = sqlite3.connect(args[1])
 c = conn.cursor()
 
-try_query("CREATE TABLE prefix (start text, url text, unique (start))")
+try_query("CREATE TABLE prefix (uri text, unique (uri))")
 
 for i in prefixes:
-    try_query("INSERT INTO prefix (start,url) VALUES (?,?)",(i,prefixes[i]))
+    try_query("INSERT INTO prefix (uri) VALUES (?)",(prefixes[i],))
 
 try_query('CREATE TABLE tripletables (tablename text, subj text, pred text, obj text, unique (tablename))')
 
@@ -78,10 +92,11 @@ for triple in triples:
     for i in range(len(triple)):
         for t in prefixes:
             if triple[i].startswith(t):
-                new_triple_style.append(t)
+                new_triple_style.append(prefixes[t])
+                triple[i] = triple[i].replace(t,'')
                 break
         if len(new_triple_style) != i+1:
-            new_triple_style.append("other")
+            new_triple_style.append("<>")
     table_name = '"' + new_triple_style[0] + new_triple_style[1] + new_triple_style[2] + '"'
     if new_triple_style not in triple_styles:
         triple_styles.append(new_triple_style)
@@ -101,4 +116,4 @@ conn.close()
 # Create prefix table and fill it with contents that it doesn't already have
 
 
-#EXAMPLE: c.execute('''CREATE TABLE prefix (start text, url text, symbol text, qty real, price real)''')
+#EXAMPLE: c.execute('''CREATE TABLE prefix (start text, uri text, symbol text, qty real, price real)''')

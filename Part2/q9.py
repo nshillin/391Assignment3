@@ -26,14 +26,9 @@ def try_query(query,extras = ()):
 def checkPrefixes():
     global c
     for i in prefixes:
-        try_query('SELECT url FROM prefix WHERE start=?',(i,))
-        url = c.fetchone()[0]
-        if url == None:
-            print "Invalid prefix: " + i
-            print "Attempting to complete without..."
-        elif url != prefixes[i]:
-            print "Invalid url: " + prefixes[i]
-            error("try " + url + " instead")
+        try_query('SELECT uri FROM prefix WHERE uri=?',(prefixes[i],))
+        uri = c.fetchone()[0]
+        if uri == None: error("uri not found: " + uri)
 
 def getTableNames():
     tablenames = []
@@ -73,7 +68,25 @@ def makeWhere(triple):
     """
     return where[:-4]
 
+def replacePrefixes():
+    flippedDict = {v: k for k, v in prefixes.iteritems()}
+    for i in allVariables:
+        for j in range(len(allVariables[i])):
+            value = allVariables[i][j]
+            if value == None or '/' not in value: continue
+            if '#' in value:
+                pos = value.rfind('#')
+            else:
+                pos = value.rfind('/')
+            value_start = ['<',value[:pos+1],'>']
+            if ''.join(value_start) in flippedDict and flippedDict[''.join(value_start)] != 'other':
+                allVariables[i][j] = value.replace(value_start[1],flippedDict[''.join(value_start)])
+
+
+
+
 def printTable(variables,printVars):
+    replacePrefixes()
     printVars = ['row']+printVars
     if printVars[1] == '*':
         printVars = []
@@ -81,7 +94,7 @@ def printTable(variables,printVars):
             if e != 'row': printVars = [e] + printVars
         printVars = ['row'] + printVars
     for i in range(len(variables['row'])):
-        variables['row'][i] = str(i)
+        variables['row'][i] = str(i+1)
     sep = '|| '
     printList = [sep]*(len(variables[max(variables, key= lambda y: len(set(variables[y])))])+2)
     for a in printVars:
@@ -122,7 +135,7 @@ args  = sys.argv
 if len(args) != 3:
     error("Expected 'python q8.py <db file> <query file>'")
 
-prefixes = {'other':'NULL'}
+prefixes = {'other':'<>'}
 printVariables = []
 allVariables = {'row':[]} # variable object example: "?city:['dbr:Edmonton','dbr:Calgary']"
 triples = []
@@ -172,23 +185,31 @@ for i in range(len(temp_list)):
         del l[-1]
         triples.append(l)
         triple_styles.append([])
-        for e in l:
-            if e.startswith('?'):
-                allVariables[e] = []
+        for e in range(len(triples[-1])):
+            if triples[-1][e].startswith('?'):
+                allVariables[triples[-1][e]] = []
                 triple_styles[-1].append("")
             else:
                 found = False
                 for t in prefixes:
-                    if e.startswith(t):
-                        triple_styles[-1].append(t)
+                    if triples[-1][e].startswith(t):
+                        triple_styles[-1].append(prefixes[t])
+                        triples[-1][e] = triples[-1][e].replace(t,'')
                         found = True
                         break
                 if not found:
-                    triple_styles[-1].append("other")
+                    if triples[-1][e][0] == '<' and triples[-1][e][-1] == '>':
+                        if '#' in triples[-1][e]:
+                            pos = triples[-1][e].rfind('#')
+                        else:
+                            pos = triples[-1][e].rfind('/')
+                        triple_styles[-1].append(triples[-1][e][:pos+1]+'>')
+                        triples[-1][e] = triples[-1][e][pos+1:-1]
+                    else:
+                        triple_styles[-1].append("other")
         order.append(['triple',len(triples)-1])
         continue
     error("invalid formatting of line: "+str(temp_list[i]))
-
 ##### BEGIN SEARCHING #####
 
 conn = sqlite3.connect(args[1])
@@ -206,25 +227,31 @@ for x in range(len(order)):
         removeLast = False
         if empty:
             for tablename in tablenames:
+                titles = tablename[2:-1].replace('>','').split('<')
                 for row in c.execute('SELECT * FROM '+tablename + where):
                     for y in range(len(triples[i])):
                         if triples[i][y].startswith("?"):
-                            allVariables[triples[i][y]].append(str(row[y].encode('utf-8')))
+                            allVariables[triples[i][y]].append(titles[y]+str(row[y].encode('utf-8')))
                 fillEmptyRows()
                 empty = False
         else:
             for tablename in tablenames:
+                print tablename
+                print where
+                titles = tablename[2:-1].replace('>','').split('<')
                 for row in c.execute('SELECT * FROM '+tablename + where):
+                    print "here"
                     tripRow = []
                     for y in range(len(triples[i])):
                         if triples[i][y].startswith("?"):
                             tripRow.append([triples[i][y],str(row[y].encode('utf-8'))])
                         else:
                             tripRow.append(['row',None])
+                    for num in range(len(tripRow)):
+                        if tripRow[num][1] != None: tripRow[num][1] = titles[num] + tripRow[num][1]
                     for t in range(len(tripRow)):
                         if tripRow[t][1] == None or tripRow[t][0] == 'row':
                             continue
-                        #elif len(set(allVariables[tripRow[t][0]])) == 1 and allVariables[tripRow[t][0]][0] == None:
                         elif None in allVariables[tripRow[t][0]]:
                             for z in range(len(allVariables['row'])):
                                 if (allVariables[tripRow[(t+1)%3][0]][z] == tripRow[(t+1)%3][1]) and (allVariables[tripRow[(t+2)%3][0]][z] == tripRow[(t+2)%3][1]) and allVariables[tripRow[t][0]][z] == None:
@@ -235,11 +262,12 @@ for x in range(len(order)):
                                     removeLast = True
                     for z in range(len(allVariables['row'])-1,-1,-1):
                         aV1,aV2,aV3 = allVariables[tripRow[0][0]][z], allVariables[tripRow[1][0]][z], allVariables[tripRow[2][0]][z]
-                        print aV1,aV2,aV3, tripRow
-                        if not ((aV1 == tripRow[0][1]) and (aV2 == tripRow[0][1]) and (aV3 == tripRow[0][1])):
+                        print aV1, tripRow[0][1]
+                        print aV2, tripRow[1][1]
+                        print aV3, tripRow[2][1]
+                        if not ((aV1 == tripRow[0][1]) and (aV2 == tripRow[1][1]) and (aV3 == tripRow[2][1])):
                             removeRow(z)
                             continue
-                        else: break
             if removeLast: removeRow(-1)
     elif kind == 'op':
         #for e in allVariables[opFilter[i][0]]:
