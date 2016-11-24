@@ -216,7 +216,6 @@ for x in range(len(order)):
             for tablename in tablenames:
                 for row in c.execute('SELECT * FROM '+tablename + where):
                     tripRow = []
-                    toRemove = []
                     for y in range(len(triples[i])):
                         if triples[i][y].startswith("?"):
                             tripRow.append([triples[i][y],str(row[y].encode('utf-8'))])
@@ -234,11 +233,13 @@ for x in range(len(order)):
                                     allVariables[tripRow[(t+2)%3][0]].append(allVariables[tripRow[(t+2)%3][0]][z])
                                     fillEmptyRows()
                                     removeLast = True
-                    for z in range(len(allVariables['row'])):
+                    for z in range(len(allVariables['row'])-1,-1,-1):
                         aV1,aV2,aV3 = allVariables[tripRow[0][0]][z], allVariables[tripRow[1][0]][z], allVariables[tripRow[2][0]][z]
+                        print aV1,aV2,aV3, tripRow
                         if not ((aV1 == tripRow[0][1]) and (aV2 == tripRow[0][1]) and (aV3 == tripRow[0][1])):
-                            toRemove.append(z)
-                            break
+                            removeRow(z)
+                            continue
+                        else: break
             if removeLast: removeRow(-1)
     elif kind == 'op':
         #for e in allVariables[opFilter[i][0]]:
