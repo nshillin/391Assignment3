@@ -166,19 +166,21 @@ for i in range(len(temp_list)):
     if len(s)==0:
         continue
     if s[-1] != '.':
-        if (i < len(temp_list)): error("missing . at end of line:"+str(temp_list[i]))
+        if (i < len(temp_list)): error("missing '.' at end of line: "+str(temp_list[i]))
         else: temp_list[i] += ' . '
-    x = re.findall(r"filter\s*regex\((.*),\s*(.*)\)",temp_list[i],re.I)
+    x = re.findall(r"filter\s+regex\((.+)\s*,\s*(.+)\)",temp_list[i],re.I)
     if x != []:
-        if not x[0][0].startswith('?'): error("line not formatted properly:"+str(temp_list[i]))
+        if not x[0][0].startswith('?'): error("line not formatted properly: "+str(temp_list[i]))
         regFilter.append(list(x[0]))
         regFilter[-1][1] = regFilter[-1][1][1:-1]
         order.append(['reg',len(regFilter)-1])
         continue
-    x = re.findall(r"filter\s*regex\((.*)\)\s*",temp_list[i],re.I)
+    x = re.findall(r"filter\s*\(([^<>!=]+)\s*([<>!=]{1,2})\s*([\-\.\d]+)\)",temp_list[i],re.I)
     if x != []:
-        if not x[0][0].startswith('?'): error("line not formatted properly:"+str(temp_list[i]))
-        opFilter.append(x[0].split())
+        if not x[0][0].startswith('?'): error("line not formatted properly: "+str(temp_list[i]))
+        opFilter.append(list(x[0]))
+        try: opFilter[-1][2] = float(opFilter[-1][2])
+        except: error("Not a number: " + opFilter[-1][2])
         order.append(['op',len(opFilter)-1])
         continue
     l = temp_list[i].split()
@@ -269,6 +271,7 @@ for x in range(len(order)):
                 if z not in doNotRemove:
                     removeRow(z)
     elif kind == 'op':
+        print opFilter[i]
         #for e in allVariables[opFilter[i][0]]:
         #
         pass

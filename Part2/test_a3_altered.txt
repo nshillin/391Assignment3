@@ -1,6 +1,5 @@
 PREFIX rdf:<http://www.w3.org/1999/02/22-rdf-syntax-ns#>
 PREFIX schema: <http://schema.org/>
-PREFIX dbr: <http://dbpedia.org/resource/>
 PREFIX dbo: <http://dbpedia.org/ontology/>
 PREFIX dbp: <http://dbpedia.org/property/>
 PREFIX owl:	<http://www.w3.org/2002/07/owl#>
@@ -8,6 +7,6 @@ PREFIX ns36:	<http://dbpedia.org/ontology/PopulatedPlace/>
 SELECT * WHERE {
 	?1 dbo:twinCountry ?other .
   	?1 ?2 ?other .
-	?1 dbp:twin1Country dbr:Quebec .
-	FILTER regex(?test < 10)   .
+	?1 dbp:twin1Country <http://dbpedia.org/resource/Quebec> .
+	FILTER (?test >= -10.77893) .
 } 
