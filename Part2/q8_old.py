@@ -35,7 +35,9 @@ def splitLine(line):
                 new_triple[i] = temp.replace('<','').replace('>','')
                 continue
             prefixes[temp[1:pos+1]] = temp[:pos+1]+'>'
+            print temp[1:pos+1], prefixes[temp[1:pos+1]]
             new_triple[i] = temp[1:-1]
+            print new_triple[i].replace(prefixes[temp[1:pos+1]],'')
     if should_append:
         triples.append(new_triple)
         prev_triple = new_triple
@@ -75,11 +77,14 @@ for line in open(args[2]):
 
 
 conn = sqlite3.connect(args[1])
-conn.text_factory = str
 c = conn.cursor()
 
-#try_query("CREATE TABLE prefix (uri text, unique (uri))")
-try_query("CREATE TABLE IF NOT EXISTS rdfStore (subj text, pred text, obj text)")
+try_query("CREATE TABLE prefix (uri text, unique (uri))")
+
+for i in prefixes:
+    try_query("INSERT INTO prefix (uri) VALUES (?)",(prefixes[i],))
+
+try_query('CREATE TABLE tripletables (tablename text, subj text, pred text, obj text, unique (tablename))')
 
 triple_styles = []
 for triple in triples:
@@ -92,10 +97,15 @@ for triple in triples:
                 break
         if len(new_triple_style) != i+1:
             new_triple_style.append("<>")
-        new_triple_style[-1] = new_triple_style[-1].replace('<','').replace('>','')
-    try_query("INSERT INTO rdfStore (subj, pred, obj) VALUES (?,?,?)",(new_triple_style[0]+triple[0], new_triple_style[1]+triple[1], new_triple_style[2]+triple[2]))
+    table_name = '"' + new_triple_style[0] + new_triple_style[1] + new_triple_style[2] + '"'
+    if new_triple_style not in triple_styles:
+        triple_styles.append(new_triple_style)
+        # Try to create new table
+        try_query('CREATE TABLE ' + table_name + ' (subj text, pred text, obj text, unique (subj,pred,obj))')
+        try_query("INSERT INTO tripletables (tablename, subj, pred, obj) VALUES (?,?,?,?)",(table_name, new_triple_style[0], new_triple_style[1], new_triple_style[2]))
+    # Insert values
+    try_query("INSERT INTO " + table_name + ' VALUES ("'+triple[0]+'","'+triple[1]+'","'+triple[2]+'")')
 
-try_query("CREATE INDEX IF NOT EXISTS rdfIndex ON rdfStore (subj, pred, obj)")
 
 conn.commit()
 conn.close()
