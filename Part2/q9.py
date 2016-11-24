@@ -58,14 +58,15 @@ def makeWhere(triple):
         elif len(allVariables[triple[y]])>0 and allVariables[triple[y]][0] != None and len(set(allVariables[triple[y]]))>1:
             where += '('
             for value in allVariables[triple[y]]:
-                if value != None:
-                    where += types[y]+'="'+value+'" or '
+                if value == None: continue
+                if '/' in value:
+                    if '#' in value:
+                        pos = value.rfind('#')
+                    else:
+                        pos = value.rfind('/')
+                    value = value[pos+1:]
+                where += types[y]+'="'+value+'" or '
             where = where[:-4] + ') and '
-    """
-    for e in triple:
-        if e in allVariables:
-            allVariables[e] = []
-    """
     return where[:-4]
 
 def replacePrefixes():
@@ -224,7 +225,6 @@ for x in range(len(order)):
     if kind == 'triple':
         tablenames = getTableNames()
         where = makeWhere(triples[i])
-        removeLast = False
         if empty:
             for tablename in tablenames:
                 titles = tablename[2:-1].replace('>','').split('<')
@@ -235,12 +235,10 @@ for x in range(len(order)):
                 fillEmptyRows()
                 empty = False
         else:
+            doNotRemove = []
             for tablename in tablenames:
-                print tablename
-                print where
                 titles = tablename[2:-1].replace('>','').split('<')
                 for row in c.execute('SELECT * FROM '+tablename + where):
-                    print "here"
                     tripRow = []
                     for y in range(len(triples[i])):
                         if triples[i][y].startswith("?"):
@@ -259,16 +257,17 @@ for x in range(len(order)):
                                     allVariables[tripRow[(t+1)%3][0]].append(allVariables[tripRow[(t+1)%3][0]][z])
                                     allVariables[tripRow[(t+2)%3][0]].append(allVariables[tripRow[(t+2)%3][0]][z])
                                     fillEmptyRows()
-                                    removeLast = True
                     for z in range(len(allVariables['row'])-1,-1,-1):
                         aV1,aV2,aV3 = allVariables[tripRow[0][0]][z], allVariables[tripRow[1][0]][z], allVariables[tripRow[2][0]][z]
-                        print aV1, tripRow[0][1]
-                        print aV2, tripRow[1][1]
-                        print aV3, tripRow[2][1]
-                        if not ((aV1 == tripRow[0][1]) and (aV2 == tripRow[1][1]) and (aV3 == tripRow[2][1])):
-                            removeRow(z)
+                        #print aV1, tripRow[0][1]
+                        #print aV2, tripRow[1][1]
+                        #print aV3, tripRow[2][1]
+                        if (aV1 == tripRow[0][1]) and (aV2 == tripRow[1][1]) and (aV3 == tripRow[2][1]):
+                            doNotRemove.append(z)
                             continue
-            if removeLast: removeRow(-1)
+            for z in range(len(allVariables['row'])-1,-1,-1):
+                if z not in doNotRemove:
+                    removeRow(z)
     elif kind == 'op':
         #for e in allVariables[opFilter[i][0]]:
         #
