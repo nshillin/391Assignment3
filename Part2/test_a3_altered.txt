@@ -8,4 +8,5 @@ PREFIX ns36:	<http://dbpedia.org/ontology/PopulatedPlace/>
 SELECT * WHERE {
 	?subj ?pred ?obj .
 	Filter (?obj == 645) .
+	Filter regex(?pred, "el") .
 } 
