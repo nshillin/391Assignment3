@@ -134,14 +134,17 @@ regFilter = []
 opFilter = []
 # [('Filter',position)]
 order = []
-
+last = [False]
 for i in range(len(temp_list)):
     s = temp_list[i].split()
     if len(s)==0:
         continue
+    if last[0]:
+        error("missing '.' at end of line: "+last[1])
     if s[-1] != '.':
-        if (i < len(temp_list)): error("missing '.' at end of line: "+str(temp_list[i]))
-        else: temp_list[i] += ' . '
+        last[0] = True
+        last.append(str(temp_list[i]))
+        temp_list[i] += ' . '
     x = re.findall(r"filter\s+regex\((.+)\s*,\s*(.+)\)",temp_list[i],re.I)
     if x != []:
         if not x[0][0].startswith('?'): error("line not formatted properly: "+str(temp_list[i]))
