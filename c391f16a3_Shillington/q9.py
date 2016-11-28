@@ -139,6 +139,12 @@ for i in range(len(temp_list)):
     s = temp_list[i].split()
     if len(s)==0:
         continue
+    if last[0]:
+        error("missing '.' at end of line: "+last[1])
+    if s[-1] != '.':
+        last[0] = True
+        last.append(str(temp_list[i]))
+        temp_list[i] += ' . '
     x = re.findall(r"filter\s+regex\((.+)\s*,\s*(.+)\)",temp_list[i],re.I)
     if x != []:
         if not x[0][0].startswith('?'): error("line not formatted properly: "+str(temp_list[i]))
@@ -155,12 +161,6 @@ for i in range(len(temp_list)):
         except: error("Not a number: " + opFilter[-1][2])
         order.append(['op',len(opFilter)-1])
         continue
-    if last[0]:
-        error("missing '.' at end of line: "+last[1])
-    if s[-1] != '.':
-        last[0] = True
-        last.append(str(temp_list[i]))
-        temp_list[i] += ' . '
     l = temp_list[i].split()
     if len(l) == 4:
         del l[-1]
@@ -240,9 +240,8 @@ for x in range(len(order)):
     elif kind == 'reg':
         if regFilter[i][0] in allVariables:
             for row in range(len(allVariables[regFilter[i][0]])-1,-1,-1):
-                if allVariables[regFilter[i][0]][row] == None or not bool(re.search(regFilter[i][1], allVariables[regFilter[i][0]][row], re.I)):
+                if allVariables[regFilter[i][0]][row] == None or (regFilter[i][1].lower() not in allVariables[regFilter[i][0]][row].lower()):
                     removeRow(row)
-                #if allVariables[regFilter[i][0]][row] == None or (regFilter[i][1].lower() not in allVariables[regFilter[i][0]][row].lower()):
         else:
             error("Variable not found: " + regFilter[i][0])
 

@@ -1,0 +1,12 @@
+PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
+PREFIX dbo: <http://dbpedia.org/ontology/>
+PREFIX dbc: <http://dbpedia.org/resource/Category:>
+PREFIX dct: <http://purl.org/dc/terms/>
+SELECT ?airport ?city WHERE {
+	?airport rdf:type <http://dbpedia.org/class/yago/WikicatAirportsInCanada> .
+	FILTER regex(?airport, "international", "i") .
+  	?airport dbo:city ?city .
+  	MINUS {
+  		?city dct:subject dbc:Provinces_and_territories_of_Canada
+  	}
+} 

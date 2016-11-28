@@ -1,0 +1,4 @@
+The sqlite3 statement to create the table is: "CREATE TABLE IF NOT EXISTS rdfStore (subj text, pred text, obj text, unique (subj, pred, obj));"
+Then, to add in the data, line by line: "INSERT INTO rdfStore (subj, pred, obj) VALUES (?,?,?);"
+
+To create the database in sqlite3, the program will first go through and find all of the prefix declarations and create a dictionary of them to make it fast and easy to replace any occurrences of the prefixes. As it is going through, it will also be making a list of all of the triples (separated into a list). The table will then be created and the program will go through each of the triples and replace any prefixes before adding them to the rdfStore table. Finally, once all of the triples from the RDF graph have been added to the table, the table will be indexed.

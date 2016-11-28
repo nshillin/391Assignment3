@@ -1,0 +1,17 @@
+@prefix rdf:	<http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+@prefix dbr:	<http://dbpedia.org/resource/> .
+@prefix yago:	<http://dbpedia.org/class/yago/> .
+dbr:Lamp	rdf:type	yago:WikicatItemsInMyHouse ,
+		yago:Lamp007 ,
+		yago:HouseLocation2 .
+@prefix wikidata:	<http://www.wikidata.org/entity/> .
+@prefix dbo:	<http://dbpedia.org/ontology/> .
+dbr:Lamp	rdf:type	dbo:LightFixtures ,
+		dbo:HouseDecoratives ,
+		dbo:Furniture ,
+		dbo:PopulatedPlace .
+@prefix dbp:	<http://dbpedia.org/property/> .
+dbr:Lamp	dbp:SwitchSettings	2 ;
+	dbp:SimilarLampsInHouse	10 ;
+	dbp:IdenticalLampsAnywhere	189 ;
+	dbp:BulbPercentage	"15.8920"^^xsd:float .

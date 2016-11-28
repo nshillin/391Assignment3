@@ -1,0 +1,16 @@
+PREFIX dbo: <http://dbpedia.org/ontology/>
+PREFIX dbc: <http://dbpedia.org/resource/Category:>
+PREFIX dct: <http://purl.org/dc/terms/>
+PREFIX dbr: <http://dbpedia.org/resource/>
+SELECT ?city (?population/COUNT(?hospital) AS ?pop_hospital_ratio)
+WHERE {
+  {?hospital dct:subject dbc:Hospitals_in_Alberta .}
+  UNION
+  {?hospital dct:subject dbc:Hospitals_in_Calgary .}
+  UNION
+  {?hospital dct:subject dbc:Hospitals_in_Edmonton .}
+  ?city dbo:type dbr:List_of_cities_in_Alberta .
+  ?hospital dbo:region ?city  .
+  ?city dbo:populationTotal ?population
+}
+order by desc(?pop_hospital_ratio)
