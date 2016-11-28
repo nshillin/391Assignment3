@@ -5,5 +5,4 @@ PREFIX dbp: <http://dbpedia.org/property/>
 PREFIX yago:	<http://dbpedia.org/class/yago/>
 SELECT * WHERE {
     ?subj ?pred ?obj . 
-    dbr:lamp ?pred2 ?obj2 . 
 } 
