@@ -62,10 +62,14 @@ if len(args) != 3:
     error("Expected 'python q8.py <db file> <RDF Turtle file>'")
 
 
-prefixes = {'other':'<>'}
+prefixes = {}
 triples = []
 prev_triple = []
 expected = 3
+
+conn = sqlite3.connect(args[1])
+conn.text_factory = str
+c = conn.cursor()
 
 for line in open(args[2]):
     if line.startswith("@prefix"):
@@ -74,26 +78,19 @@ for line in open(args[2]):
         splitLine(line.strip('\n')[0:-2] + '\t' + line.strip('\n')[-1])
 
 
-conn = sqlite3.connect(args[1])
-conn.text_factory = str
-c = conn.cursor()
 
 #try_query("CREATE TABLE prefix (uri text, unique (uri))")
-try_query("CREATE TABLE IF NOT EXISTS rdfStore (subj text, pred text, obj text)")
+try_query("CREATE TABLE IF NOT EXISTS rdfStore (subj text, pred text, obj text, unique (subj, pred, obj))")
 
-triple_styles = []
 for triple in triples:
-    new_triple_style = []
     for i in range(len(triple)):
-        for t in prefixes:
-            if triple[i].startswith(t):
-                new_triple_style.append(prefixes[t])
-                triple[i] = triple[i].replace(t,'')
-                break
-        if len(new_triple_style) != i+1:
-            new_triple_style.append("<>")
-        new_triple_style[-1] = new_triple_style[-1].replace('<','').replace('>','')
-    try_query("INSERT INTO rdfStore (subj, pred, obj) VALUES (?,?,?)",(new_triple_style[0]+triple[0], new_triple_style[1]+triple[1], new_triple_style[2]+triple[2]))
+        position = triple[i].find(':')
+        if position != -1:
+            prefix = triple[i][:position+1]
+            if (prefix in prefixes) and triple[i].startswith(prefix):
+                triple[i] = triple[i].replace(prefix,prefixes[prefix])
+        triple[i] = triple[i].replace('<','').replace('>','')
+    try_query("INSERT INTO rdfStore (subj, pred, obj) VALUES (?,?,?)",(triple[0], triple[1], triple[2]))
 
 try_query("CREATE INDEX IF NOT EXISTS rdfIndex ON rdfStore (subj, pred, obj)")
 

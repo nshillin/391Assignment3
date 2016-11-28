@@ -1,13 +1,12 @@
-PREFIX dbr: <http://dbpedia.org/resource/>
+PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
 PREFIX dbo: <http://dbpedia.org/ontology/>
-PREFIX db: <http://dbpedia.org/>
 PREFIX dbc: <http://dbpedia.org/resource/Category:>
 PREFIX dct: <http://purl.org/dc/terms/>
-PREFIX dbt: <http://dbpedia.org/resource/Template:>
-PREFIX dbp: <http://dbpedia.org/property/>
-SELECT ?airport
-WHERE {
-	?airport dct:subject dbc:List_of_international_airports_in_Canada .
-}
-
-NOT FINISHED
+SELECT ?airport ?city WHERE {
+	?airport rdf:type <http://dbpedia.org/class/yago/WikicatAirportsInCanada> .
+	FILTER regex(?airport, "international", "i") .
+  	?airport dbo:city ?city .
+  	MINUS {
+  		?city dct:subject dbc:Provinces_and_territories_of_Canada
+  	}
+} 

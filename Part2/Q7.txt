@@ -1,0 +1,3 @@
+An index is of the rdfStore table is used to make searching the triples much more efficient: "CREATE INDEX IF NOT EXISTS rdfIndex ON rdfStore (subj, pred, obj)"
+All 3 columns are indexed because all of the searches will be made across all 3 columns to keep things simple. An example of a query might be "SELECT * from rdfStore WHERE subj='http://dbpedia.org/resource/Edmonton' and pred='http://dbpedia.org/property/elevationM';"
+All of the queries will be searching the columns in this order, so there should be no reduction in efficiency.

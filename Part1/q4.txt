@@ -1,0 +1,9 @@
+PREFIX dbc: <http://dbpedia.org/resource/Category:>
+PREFIX dct: <http://purl.org/dc/terms/>
+PREFIX dbp: <http://dbpedia.org/property/>
+SELECT ?team (count(?final) as ?matches_played) WHERE {
+   ?final dct:subject dbc:FIFA_World_Cup_finals .
+   ?final dbp:team ?team
+} 
+GROUP BY ?team
+HAVING (count(?final)>3)

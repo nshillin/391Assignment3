@@ -1,0 +1,11 @@
+PREFIX dbc: <http://dbpedia.org/resource/Category:>
+PREFIX dct: <http://purl.org/dc/terms/>
+PREFIX dbr: <http://dbpedia.org/resource/>
+PREFIX dbo: <http://dbpedia.org/ontology/>
+SELECT ?country (count(?player) as ?playerCount) WHERE {
+  ?club dct:subject dbc:Unrelegated_association_football_clubs  .
+  ?club dbo:league dbr:La_Liga .
+  ?player dbo:team ?club .
+  ?player dbo:birthPlace ?country .
+  ?country dct:subject dbc:Countries_in_South_America .
+} 

@@ -57,7 +57,7 @@ def replacePrefixes():
             else:
                 pos = value.rfind('/')
             value_start = ['<',value[:pos+1],'>']
-            if ''.join(value_start) in flippedDict and flippedDict[''.join(value_start)] != 'other':
+            if ''.join(value_start) in flippedDict:
                 allVariables[i][j] = value.replace(value_start[1],flippedDict[''.join(value_start)])
 
 
@@ -111,7 +111,7 @@ args  = sys.argv
 if len(args) != 3:
     error("Expected 'python q8.py <db file> <query file>'")
 
-prefixes = {'other':'<>'}
+prefixes = {}
 printVariables = []
 allVariables = {'row':[]} # variable object example: "?city:['dbr:Edmonton','dbr:Calgary']"
 triples = []
